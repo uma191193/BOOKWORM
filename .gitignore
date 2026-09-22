@@ -1,0 +1,26 @@
+# Secrets and credentials — NEVER commit these
+.env
+.env.*
+application-secrets.properties
+application-prod.properties
+
+# Maven
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.eclipse
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log

@@ -1,0 +1,18 @@
+{
+  "title": "Clean Code",
+  "authorId": "cccccccc-0000-0000-0000-000000000002",
+  "publisherId": "bbbbbbbb-0000-0000-0000-000000000002",
+  "categoryIds": [
+    "dddddddd-0000-0000-0000-000000000002"
+  ],
+  "description": "A handbook of agile software craftsmanship — practical advice on writing readable, maintainable code.",
+  "format": "HARDCOVER",
+  "language": "English",
+  "price": 1499.00,
+  "currencyCode": "INR",
+  "coverImageUrl": "https://cdn.bookworm.dev/covers/clean-code.jpg",
+  "isbn": "9780132350884",
+  "tags": ["Technology", "Software Engineering", "Clean Code"],
+  "tentativeDeliveryDate": "2025-08-15",
+  "storeId": "00000000-0000-0000-0000-000000000002"
+}

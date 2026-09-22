@@ -1,0 +1,19 @@
+{
+  "title": "The 48 Laws of Power",
+  "authorId": "cccccccc-0000-0000-0000-000000000001",
+  "publisherId": "bbbbbbbb-0000-0000-0000-000000000001",
+  "categoryIds": [
+    "dddddddd-0000-0000-0000-000000000001",
+    "dddddddd-0000-0000-0000-000000000004"
+  ],
+  "description": "Amoral, cunning, ruthless, and instructive, The 48 Laws of Power is the definitive manual for anyone interested in gaining, observing, or defending against ultimate control.",
+  "format": "PAPERBACK",
+  "language": "English",
+  "price": 599.00,
+  "currencyCode": "INR",
+  "coverImageUrl": "https://cdn.bookworm.dev/covers/48-laws-of-power.jpg",
+  "isbn": "9780140280197",
+  "tags": ["Self Help", "Strategy", "Non-Fiction"],
+  "tentativeDeliveryDate": "2025-09-01",
+  "storeId": "00000000-0000-0000-0000-000000000001"
+}

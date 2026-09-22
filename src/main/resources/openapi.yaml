@@ -1,0 +1,2063 @@
+openapi: 3.0.3
+info:
+  title: Book Worm E-Bookstore API
+  description: >
+    REST API for the Book Worm e-commerce platform enabling customers to browse,
+    select and purchase books. Covers authentication, catalogue browsing,
+    shopping cart, wishlist, order management, payment processing and shipment tracking.
+  version: 1.0.0
+  contact:
+    name: Book Worm Platform Team
+
+servers:
+  - url: https://api.bookworm.com/api/v1
+    description: Production
+  - url: http://localhost:8080/api/v1
+    description: Local development
+
+security:
+  - BearerAuth: []
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from /auth/login
+
+  schemas:
+
+    # ── Enums ────────────────────────────────────────────────────────────────
+
+    Role:
+      type: string
+      enum: [GUEST, MEMBER, ADMIN]
+
+    BookFormat:
+      type: string
+      enum: [PAPERBACK, HARDCOVER, EBOOK]
+
+    OrderStatus:
+      type: string
+      enum: [PENDING, CONFIRMED, CANCELLED, RETURNED, SHIPPED, DELIVERED]
+
+    PaymentMethod:
+      type: string
+      enum: [CREDIT_CARD, DEBIT_CARD, UPI, WALLET]
+
+    PaymentStatus:
+      type: string
+      enum: [PENDING, SUCCESS, FAILED, REFUNDED]
+
+    RecommendationType:
+      type: string
+      enum: [PERSONALISED, RELATED, UPSELL, CROSS_SELL]
+
+    DiscountType:
+      type: string
+      enum: [FLAT, PERCENTAGE]
+
+    GiftPointTransactionType:
+      type: string
+      enum: [EARNED, REDEEMED]
+
+    # ── User ─────────────────────────────────────────────────────────────────
+
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phone:
+          type: string
+        role:
+          $ref: '#/components/schemas/Role'
+        giftPointBalance:
+          type: integer
+          minimum: 0
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    RegisterRequest:
+      type: object
+      required: [email, password, firstName, lastName]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+          description: Plain-text password — hashed server-side before storage
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phone:
+          type: string
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    LoginResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: JWT bearer token
+        tokenType:
+          type: string
+          default: Bearer
+        user:
+          $ref: '#/components/schemas/UserResponse'
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phone:
+          type: string
+
+    # ── Store ─────────────────────────────────────────────────────────────────
+
+    Store:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        policies:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateStoreRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        policies:
+          type: string
+
+    # ── Category ──────────────────────────────────────────────────────────────
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        slug:
+          type: string
+        parentCategoryId:
+          type: string
+          format: uuid
+          nullable: true
+
+    # ── Author ────────────────────────────────────────────────────────────────
+
+    Author:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        bio:
+          type: string
+        profileImageUrl:
+          type: string
+          format: uri
+
+    # ── Publisher ─────────────────────────────────────────────────────────────
+
+    Publisher:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        website:
+          type: string
+          format: uri
+
+    # ── Book ──────────────────────────────────────────────────────────────────
+
+    Book:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        author:
+          $ref: '#/components/schemas/Author'
+        publisher:
+          $ref: '#/components/schemas/Publisher'
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/Category'
+        description:
+          type: string
+        format:
+          $ref: '#/components/schemas/BookFormat'
+        language:
+          type: string
+        price:
+          type: number
+          format: double
+          minimum: 0
+        currencyCode:
+          type: string
+          default: INR
+        coverImageUrl:
+          type: string
+          format: uri
+        isbn:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        tentativeDeliveryDate:
+          type: string
+          format: date
+        averageRating:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 5
+        salesCount:
+          type: integer
+          minimum: 0
+        storeId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+
+    BookSummary:
+      type: object
+      description: Lightweight book representation used in lists and recommendations
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        authorName:
+          type: string
+        coverImageUrl:
+          type: string
+          format: uri
+        price:
+          type: number
+          format: double
+        currencyCode:
+          type: string
+          default: INR
+        format:
+          $ref: '#/components/schemas/BookFormat'
+        tags:
+          type: array
+          items:
+            type: string
+        tentativeDeliveryDate:
+          type: string
+          format: date
+        averageRating:
+          type: number
+          format: double
+
+    BookListResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookSummary'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        page:
+          type: integer
+        size:
+          type: integer
+
+    # ── Review ────────────────────────────────────────────────────────────────
+
+    Review:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        bookId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comment:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateReviewRequest:
+      type: object
+      required: [rating]
+      properties:
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comment:
+          type: string
+          maxLength: 2000
+
+    # ── Cart ──────────────────────────────────────────────────────────────────
+
+    CartItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        book:
+          $ref: '#/components/schemas/BookSummary'
+        quantity:
+          type: integer
+          minimum: 1
+        unitPrice:
+          type: number
+          format: double
+
+    Cart:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItem'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    AddToCartRequest:
+      type: object
+      required: [bookId, quantity]
+      properties:
+        bookId:
+          type: string
+          format: uuid
+        quantity:
+          type: integer
+          minimum: 1
+
+    UpdateCartItemRequest:
+      type: object
+      required: [quantity]
+      properties:
+        quantity:
+          type: integer
+          minimum: 1
+
+    # ── Wishlist ──────────────────────────────────────────────────────────────
+
+    WishlistItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        book:
+          $ref: '#/components/schemas/BookSummary'
+        addedAt:
+          type: string
+          format: date-time
+
+    Wishlist:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/WishlistItem'
+        createdAt:
+          type: string
+          format: date-time
+
+    AddToWishlistRequest:
+      type: object
+      required: [bookId]
+      properties:
+        bookId:
+          type: string
+          format: uuid
+
+    # ── Address ───────────────────────────────────────────────────────────────
+
+    Address:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        addressLine1:
+          type: string
+        addressLine2:
+          type: string
+        city:
+          type: string
+        pin:
+          type: string
+        state:
+          type: string
+        country:
+          type: string
+          default: India
+        isSaved:
+          type: boolean
+
+    CreateAddressRequest:
+      type: object
+      required: [firstName, lastName, email, phone, addressLine1, city, pin, state, country]
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        addressLine1:
+          type: string
+        addressLine2:
+          type: string
+        city:
+          type: string
+        pin:
+          type: string
+        state:
+          type: string
+        country:
+          type: string
+          default: India
+        isSaved:
+          type: boolean
+          default: false
+
+    # ── Order ─────────────────────────────────────────────────────────────────
+
+    OrderItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        book:
+          $ref: '#/components/schemas/BookSummary'
+        quantity:
+          type: integer
+          minimum: 1
+        unitPrice:
+          type: number
+          format: double
+        tentativeDeliveryDate:
+          type: string
+          format: date
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+        deliveryAddress:
+          $ref: '#/components/schemas/Address'
+        status:
+          $ref: '#/components/schemas/OrderStatus'
+        subtotal:
+          type: number
+          format: double
+        tax:
+          type: number
+          format: double
+        deliveryCharge:
+          type: number
+          format: double
+        discount:
+          type: number
+          format: double
+        totalAmount:
+          type: number
+          format: double
+        couponCode:
+          type: string
+          nullable: true
+        giftPointsRedeemed:
+          type: integer
+          minimum: 0
+        paymentId:
+          type: string
+          format: uuid
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        cancellationDeadline:
+          type: string
+          format: date-time
+
+    CreateOrderRequest:
+      type: object
+      required: [cartId, deliveryAddress]
+      properties:
+        cartId:
+          type: string
+          format: uuid
+        deliveryAddress:
+          $ref: '#/components/schemas/CreateAddressRequest'
+        couponCode:
+          type: string
+        giftPointsToRedeem:
+          type: integer
+          minimum: 0
+
+    # ── Payment ───────────────────────────────────────────────────────────────
+
+    Payment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        orderId:
+          type: string
+          format: uuid
+        method:
+          $ref: '#/components/schemas/PaymentMethod'
+        status:
+          $ref: '#/components/schemas/PaymentStatus'
+        amount:
+          type: number
+          format: double
+        currencyCode:
+          type: string
+          default: INR
+        transactionRef:
+          type: string
+        initiatedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    InitiatePaymentRequest:
+      type: object
+      required: [orderId, method]
+      properties:
+        orderId:
+          type: string
+          format: uuid
+        method:
+          $ref: '#/components/schemas/PaymentMethod'
+
+    ConfirmPaymentRequest:
+      type: object
+      required: [paymentId, transactionRef]
+      properties:
+        paymentId:
+          type: string
+          format: uuid
+        transactionRef:
+          type: string
+          description: Reference returned by payment gateway — never contains raw card data
+
+    ApplyCouponRequest:
+      type: object
+      required: [orderId, couponCode]
+      properties:
+        orderId:
+          type: string
+          format: uuid
+        couponCode:
+          type: string
+
+    ApplyCouponResponse:
+      type: object
+      properties:
+        discount:
+          type: number
+          format: double
+        newTotal:
+          type: number
+          format: double
+
+    RedeemGiftPointsRequest:
+      type: object
+      required: [orderId, points]
+      properties:
+        orderId:
+          type: string
+          format: uuid
+        points:
+          type: integer
+          minimum: 1
+
+    RedeemGiftPointsResponse:
+      type: object
+      properties:
+        pointsRedeemed:
+          type: integer
+        discountApplied:
+          type: number
+          format: double
+        remainingPoints:
+          type: integer
+        newTotal:
+          type: number
+          format: double
+
+    # ── Coupon ────────────────────────────────────────────────────────────────
+
+    Coupon:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        discountType:
+          $ref: '#/components/schemas/DiscountType'
+        discountValue:
+          type: number
+          format: double
+        minOrderValue:
+          type: number
+          format: double
+        expiryDate:
+          type: string
+          format: date
+        maxUses:
+          type: integer
+        currentUses:
+          type: integer
+
+    # ── GiftPoint ─────────────────────────────────────────────────────────────
+
+    GiftPoint:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        points:
+          type: integer
+        transactionType:
+          $ref: '#/components/schemas/GiftPointTransactionType'
+        referenceOrderId:
+          type: string
+          format: uuid
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+
+    # ── Shipment ──────────────────────────────────────────────────────────────
+
+    Shipment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        orderId:
+          type: string
+          format: uuid
+        trackingNumber:
+          type: string
+        carrier:
+          type: string
+        estimatedDeliveryDate:
+          type: string
+          format: date
+        actualDeliveryDate:
+          type: string
+          format: date
+          nullable: true
+        shippingRate:
+          type: number
+          format: double
+        status:
+          type: string
+        isReturn:
+          type: boolean
+          default: false
+
+    ShippingRateResponse:
+      type: object
+      properties:
+        rate:
+          type: number
+          format: double
+        estimatedDeliveryDate:
+          type: string
+          format: date
+        carrier:
+          type: string
+
+    # ── Recommendation ────────────────────────────────────────────────────────
+
+    Recommendation:
+      type: object
+      properties:
+        book:
+          $ref: '#/components/schemas/BookSummary'
+        recommendationType:
+          $ref: '#/components/schemas/RecommendationType'
+        score:
+          type: number
+          format: double
+        sourceBookId:
+          type: string
+          format: uuid
+          nullable: true
+
+    # ── Common ────────────────────────────────────────────────────────────────
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+  responses:
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    BadRequest:
+      description: Invalid request payload
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Conflict:
+      description: Resource conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+# ── Paths ─────────────────────────────────────────────────────────────────────
+
+paths:
+
+  # Auth
+
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new user
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Authenticate user and obtain JWT
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout and invalidate session
+      responses:
+        '204':
+          description: Logged out
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Get authenticated user profile
+      responses:
+        '200':
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # Users
+
+  /users/{userId}:
+    get:
+      tags: [Users]
+      summary: Get user profile
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Users]
+      summary: Update user profile
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /users/{userId}/order-history:
+    get:
+      tags: [Users]
+      summary: Get order history with Buy Again capability
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Order history list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Order'
+                  totalElements:
+                    type: integer
+                  totalPages:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /users/{userId}/recommendations:
+    get:
+      tags: [Users]
+      summary: Get personalised recommendations based on order history
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Personalised recommendations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Recommendation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /users/{userId}/addresses:
+    get:
+      tags: [Addresses]
+      summary: List saved addresses for a user
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of addresses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Address'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [Addresses]
+      summary: Add a new address
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAddressRequest'
+      responses:
+        '201':
+          description: Address created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Address'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /users/{userId}/addresses/{addressId}:
+    put:
+      tags: [Addresses]
+      summary: Update a saved address
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: addressId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAddressRequest'
+      responses:
+        '200':
+          description: Address updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Address'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Addresses]
+      summary: Delete a saved address
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: addressId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Address deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # Stores
+
+  /stores:
+    get:
+      tags: [Stores]
+      summary: List all stores
+      security: []
+      responses:
+        '200':
+          description: Store list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Store'
+    post:
+      tags: [Stores]
+      summary: Create a new store (admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateStoreRequest'
+      responses:
+        '201':
+          description: Store created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Store'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /stores/{storeId}:
+    get:
+      tags: [Stores]
+      summary: Get store details
+      security: []
+      parameters:
+        - name: storeId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Store detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Store'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # Catalogue
+
+  /catalog/categories:
+    get:
+      tags: [Catalogue]
+      summary: List all book categories
+      security: []
+      responses:
+        '200':
+          description: Category list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+
+  /catalog/books:
+    get:
+      tags: [Catalogue]
+      summary: Browse books with filters and sorting
+      security: []
+      parameters:
+        - name: categoryId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: authorId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: format
+          in: query
+          schema:
+            $ref: '#/components/schemas/BookFormat'
+        - name: language
+          in: query
+          schema:
+            type: string
+        - name: minPrice
+          in: query
+          schema:
+            type: number
+        - name: maxPrice
+          in: query
+          schema:
+            type: number
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [RELEVANCE, PRICE_ASC, PRICE_DESC, RATING, NEW_ARRIVALS]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Paged book list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookListResponse'
+
+  /catalog/books/recommended:
+    get:
+      tags: [Catalogue]
+      summary: Recommended for You section on landing page
+      responses:
+        '200':
+          description: Recommended books
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Recommendation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /catalog/books/bestsellers:
+    get:
+      tags: [Catalogue]
+      summary: Bestsellers this month
+      security: []
+      responses:
+        '200':
+          description: Bestseller books
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookSummary'
+
+  /catalog/books/new-launches:
+    get:
+      tags: [Catalogue]
+      summary: New launch books
+      security: []
+      responses:
+        '200':
+          description: New launch books
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookSummary'
+
+  /catalog/books/{bookId}:
+    get:
+      tags: [Catalogue]
+      summary: Get book detail including delivery date and rating
+      security: []
+      parameters:
+        - name: bookId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Book detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /catalog/books/{bookId}/related:
+    get:
+      tags: [Catalogue]
+      summary: Related and cross-sell books for a given book
+      security: []
+      parameters:
+        - name: bookId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 6
+      responses:
+        '200':
+          description: Related book recommendations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Recommendation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /catalog/books/{bookId}/reviews:
+    get:
+      tags: [Reviews]
+      summary: Get reviews for a book
+      security: []
+      parameters:
+        - name: bookId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Reviews list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Review'
+                  totalElements:
+                    type: integer
+                  totalPages:
+                    type: integer
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags: [Reviews]
+      summary: Submit a review for a book
+      parameters:
+        - name: bookId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReviewRequest'
+      responses:
+        '201':
+          description: Review submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /catalog/authors:
+    get:
+      tags: [Catalogue]
+      summary: List all authors
+      security: []
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Author list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Author'
+
+  /catalog/authors/{authorId}:
+    get:
+      tags: [Catalogue]
+      summary: Get author profile and their books
+      security: []
+      parameters:
+        - name: authorId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Author with books
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  author:
+                    $ref: '#/components/schemas/Author'
+                  books:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BookSummary'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # Cart
+
+  /cart:
+    get:
+      tags: [Cart]
+      summary: Get current user cart
+      responses:
+        '200':
+          description: Cart
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    delete:
+      tags: [Cart]
+      summary: Clear entire cart
+      responses:
+        '204':
+          description: Cart cleared
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /cart/items:
+    post:
+      tags: [Cart]
+      summary: Add a book to the cart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddToCartRequest'
+      responses:
+        '201':
+          description: Item added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /cart/items/{itemId}:
+    put:
+      tags: [Cart]
+      summary: Update cart item quantity
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCartItemRequest'
+      responses:
+        '200':
+          description: Updated cart
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Cart]
+      summary: Remove a specific item from the cart
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Updated cart after removal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # Wishlist
+
+  /wishlist:
+    get:
+      tags: [Wishlist]
+      summary: Get current user wishlist
+      responses:
+        '200':
+          description: Wishlist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wishlist'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /wishlist/items:
+    post:
+      tags: [Wishlist]
+      summary: Add a book to wishlist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddToWishlistRequest'
+      responses:
+        '201':
+          description: Item added to wishlist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wishlist'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /wishlist/items/{itemId}:
+    delete:
+      tags: [Wishlist]
+      summary: Remove a book from wishlist
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Item removed from wishlist
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # Orders
+
+  /orders:
+    post:
+      tags: [Orders]
+      summary: Create a new order from cart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderRequest'
+      responses:
+        '201':
+          description: Order created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    get:
+      tags: [Orders]
+      summary: List orders for current user
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/OrderStatus'
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Order list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Order'
+                  totalElements:
+                    type: integer
+                  totalPages:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /orders/{orderId}:
+    get:
+      tags: [Orders]
+      summary: Get order detail
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Order detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /orders/{orderId}/confirm:
+    post:
+      tags: [Orders]
+      summary: Confirm a pending order
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Order confirmed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /orders/{orderId}/cancel:
+    post:
+      tags: [Orders]
+      summary: Cancel an order (allowed within 48 hours of creation)
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Order cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /orders/{orderId}/return:
+    post:
+      tags: [Orders]
+      summary: Initiate a return for a delivered order
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Return initiated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # Payments
+
+  /payments/initiate:
+    post:
+      tags: [Payments]
+      summary: Initiate payment for an order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitiatePaymentRequest'
+      responses:
+        '201':
+          description: Payment initiated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /payments/confirm:
+    post:
+      tags: [Payments]
+      summary: Confirm payment after gateway callback
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmPaymentRequest'
+      responses:
+        '200':
+          description: Payment confirmed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /payments/{paymentId}:
+    get:
+      tags: [Payments]
+      summary: Get payment status
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Payment detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /payments/{paymentId}/refund:
+    post:
+      tags: [Payments]
+      summary: Trigger refund for a payment
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Refund initiated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /payments/apply-coupon:
+    post:
+      tags: [Payments]
+      summary: Apply a coupon code to an order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplyCouponRequest'
+      responses:
+        '200':
+          description: Coupon applied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplyCouponResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /payments/redeem-gift-points:
+    post:
+      tags: [Payments]
+      summary: Redeem gift points against an order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RedeemGiftPointsRequest'
+      responses:
+        '200':
+          description: Gift points redeemed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RedeemGiftPointsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # Shipments
+
+  /shipments/rate:
+    get:
+      tags: [Shipments]
+      summary: Calculate shipping rate and estimated delivery
+      parameters:
+        - name: pin
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: country
+          in: query
+          schema:
+            type: string
+            default: India
+      responses:
+        '200':
+          description: Shipping rate estimate
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShippingRateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /shipments/{orderId}:
+    get:
+      tags: [Shipments]
+      summary: Get shipment details for an order
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Shipment detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Shipment'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /shipments/{shipmentId}/return:
+    post:
+      tags: [Shipments]
+      summary: Initiate a return shipment
+      parameters:
+        - name: shipmentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Return shipment initiated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Shipment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'

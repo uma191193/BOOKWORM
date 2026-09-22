@@ -1,0 +1,19 @@
+{
+  "title": "Atomic Habits — Updated Edition",
+  "authorId": "cccccccc-0000-0000-0000-000000000001",
+  "publisherId": "bbbbbbbb-0000-0000-0000-000000000001",
+  "categoryIds": [
+    "dddddddd-0000-0000-0000-000000000001",
+    "dddddddd-0000-0000-0000-000000000004"
+  ],
+  "description": "An Easy and Proven Way to Build Good Habits and Break Bad Ones — Updated Edition.",
+  "format": "PAPERBACK",
+  "language": "English",
+  "price": 549.00,
+  "currencyCode": "INR",
+  "coverImageUrl": "https://cdn.bookworm.dev/covers/atomic-habits-v2.jpg",
+  "isbn": "9781847941831",
+  "tags": ["Self Help", "Habits", "Non-Fiction"],
+  "tentativeDeliveryDate": "2025-08-10",
+  "storeId": "00000000-0000-0000-0000-000000000001"
+}
