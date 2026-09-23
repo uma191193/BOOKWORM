@@ -48,6 +48,6 @@ public interface BookService {
                 categoryResponses, b.getDescription(), b.getFormat(), b.getLanguage(),
                 b.getPrice(), b.getCurrencyCode(), b.getCoverImageUrl(), b.getIsbn(),
                 b.getTags(), b.getTentativeDeliveryDate(), b.getAverageRating(),
-                b.getSalesCount(), b.getStoreId(), b.getCreatedAt());
+                b.getSalesCount(), b.getStockCount(), b.getStoreId(), b.getCreatedAt());
     }
 }

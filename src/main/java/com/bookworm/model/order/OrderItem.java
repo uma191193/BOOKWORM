@@ -38,8 +38,8 @@ public class OrderItem {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @NotNull
-    @Column(nullable = false)
+    /** Back-reference to the owning order. Managed by Hibernate via {@code @JoinColumn} on Order. */
+    @Column(name = "order_id", insertable = false, updatable = false)
     private UUID orderId;
 
     @NotNull

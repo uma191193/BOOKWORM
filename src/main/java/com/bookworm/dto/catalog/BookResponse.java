@@ -25,6 +25,7 @@ public record BookResponse(
         LocalDate tentativeDeliveryDate,
         double averageRating,
         int salesCount,
+        int stockCount,
         UUID storeId,
         LocalDateTime createdAt
 ) {}

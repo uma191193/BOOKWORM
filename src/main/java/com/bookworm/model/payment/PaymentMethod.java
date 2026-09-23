@@ -11,6 +11,8 @@ public enum PaymentMethod {
     DEBIT_CARD,
     /** Unified Payments Interface (UPI). */
     UPI,
+    /** Net Banking via gateway. */
+    NET_BANKING,
     /** Platform wallet / gift card balance. */
     WALLET
 }

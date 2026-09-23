@@ -53,7 +53,7 @@ class BookControllerTest {
                 bookId, "Atomic Habits", author, null, List.of(),
                 "Description", BookFormat.PAPERBACK, "English",
                 new BigDecimal("499.00"), "INR", null, "978-1",
-                List.of("Self Help"), null, 4.8, 1000, null,
+                List.of("Self Help"), null, 4.8, 1000, 342, null,
                 LocalDateTime.now());
     }
 

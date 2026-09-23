@@ -1,5 +1,6 @@
 package com.bookworm.controller;
 
+import com.bookworm.dto.order.AddressRequest;
 import com.bookworm.dto.order.CheckoutRequest;
 import com.bookworm.dto.order.OrderResponse;
 import com.bookworm.exception.BusinessException;
@@ -45,16 +46,19 @@ class OrderControllerTest {
 
     private UUID userId;
     private UUID orderId;
-    private UUID addressId;
+    private AddressRequest testAddress;
     private User principalUser;
     private OrderResponse orderResponse;
     private UsernamePasswordAuthenticationToken auth;
 
     @BeforeEach
     void setUp() {
-        userId    = UUID.randomUUID();
-        orderId   = UUID.randomUUID();
-        addressId = UUID.randomUUID();
+        userId  = UUID.randomUUID();
+        orderId = UUID.randomUUID();
+
+        testAddress = new AddressRequest(
+                "Alice", "Smith", "alice@example.com", "+91-9876543210",
+                "123 Main St", null, "Mumbai", "400001", "Maharashtra", "India");
 
         principalUser = User.builder()
                 .id(userId).email("alice@example.com")
@@ -79,7 +83,7 @@ class OrderControllerTest {
     @Test
     @DisplayName("POST /orders/checkout: 201 creates order")
     void checkout_returns201() throws Exception {
-        CheckoutRequest req = new CheckoutRequest(addressId, null, 0);
+        CheckoutRequest req = new CheckoutRequest(testAddress, null, 0);
         when(orderService.checkout(eq(userId), any())).thenReturn(orderResponse);
 
         mockMvc.perform(post("/api/v1/orders/checkout")
@@ -94,7 +98,7 @@ class OrderControllerTest {
     @Test
     @DisplayName("POST /orders/checkout: 422 on empty cart")
     void checkout_returns422OnEmptyCart() throws Exception {
-        CheckoutRequest req = new CheckoutRequest(addressId, null, 0);
+        CheckoutRequest req = new CheckoutRequest(testAddress, null, 0);
         when(orderService.checkout(eq(userId), any()))
                 .thenThrow(new BusinessException("Cannot checkout an empty cart."));
 

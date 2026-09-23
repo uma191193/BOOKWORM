@@ -1,5 +1,6 @@
 package com.bookworm.service;
 
+import com.bookworm.dto.order.AddressRequest;
 import com.bookworm.dto.order.CheckoutRequest;
 import com.bookworm.dto.order.OrderResponse;
 import com.bookworm.exception.BusinessException;
@@ -44,17 +45,19 @@ class OrderServiceImplTest {
     @InjectMocks OrderServiceImpl orderService;
 
     private UUID userId;
-    private UUID addressId;
     private UUID orderId;
+    private AddressRequest testAddress;
     private Book book;
     private Cart cartWithItem;
     private Order pendingOrder;
 
     @BeforeEach
     void setUp() {
-        userId    = UUID.randomUUID();
-        addressId = UUID.randomUUID();
-        orderId   = UUID.randomUUID();
+        userId  = UUID.randomUUID();
+        orderId = UUID.randomUUID();
+        testAddress = new AddressRequest(
+                "Alice", "Smith", "alice@example.com", "+91-9876543210",
+                "123 Main St", null, "Mumbai", "400001", "Maharashtra", "India");
 
         Author author = Author.builder().id(UUID.randomUUID()).name("James Clear").build();
         book = Book.builder()
@@ -92,31 +95,30 @@ class OrderServiceImplTest {
     // ── checkout ──────────────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("checkout: creates order from cart and clears cart")
-    void checkout_createsOrderAndClearsCart() {
-        CheckoutRequest req = new CheckoutRequest(addressId, null, 0);
+    @DisplayName("checkout: creates order from cart (cart NOT cleared until payment)")
+    void checkout_createsOrder() {
+        CheckoutRequest req = new CheckoutRequest(testAddress, null, 0);
         when(cartRepository.findByUserId(userId)).thenReturn(Optional.of(cartWithItem));
         when(orderRepository.save(any(Order.class))).thenAnswer(inv -> {
             Order o = inv.getArgument(0);
             o.setId(orderId);
             return o;
         });
-        when(cartRepository.save(any(Cart.class))).thenReturn(cartWithItem);
 
         OrderResponse response = orderService.checkout(userId, req);
 
         assertThat(response.userId()).isEqualTo(userId);
         assertThat(response.status()).isEqualTo(OrderStatus.PENDING);
-        assertThat(cartWithItem.getItems()).isEmpty(); // cart cleared
+        // Cart items must NOT be cleared here — only cleared after payment
+        assertThat(cartWithItem.getItems()).isNotEmpty();
     }
 
     @Test
     @DisplayName("checkout: calculates 18% tax on subtotal")
     void checkout_calculatesTax() {
-        CheckoutRequest req = new CheckoutRequest(addressId, null, 0);
+        CheckoutRequest req = new CheckoutRequest(testAddress, null, 0);
         when(cartRepository.findByUserId(userId)).thenReturn(Optional.of(cartWithItem));
         when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
-        when(cartRepository.save(any(Cart.class))).thenReturn(cartWithItem);
 
         OrderResponse response = orderService.checkout(userId, req);
 
@@ -135,7 +137,7 @@ class OrderServiceImplTest {
                 .build();
         when(cartRepository.findByUserId(userId)).thenReturn(Optional.of(emptyCart));
 
-        assertThatThrownBy(() -> orderService.checkout(userId, new CheckoutRequest(addressId, null, 0)))
+        assertThatThrownBy(() -> orderService.checkout(userId, new CheckoutRequest(testAddress, null, 0)))
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("empty cart");
     }
@@ -145,7 +147,7 @@ class OrderServiceImplTest {
     void checkout_throwsWhenCartNotFound() {
         when(cartRepository.findByUserId(userId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> orderService.checkout(userId, new CheckoutRequest(addressId, null, 0)))
+        assertThatThrownBy(() -> orderService.checkout(userId, new CheckoutRequest(testAddress, null, 0)))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 

@@ -120,6 +120,11 @@ public class Book {
     @Builder.Default
     private int salesCount = 0;
 
+    /** Number of copies currently in stock. */
+    @Builder.Default
+    @Column(nullable = false)
+    private int stockCount = 0;
+
     /** Store this book belongs to. */
     @Column
     private UUID storeId;

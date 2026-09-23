@@ -161,7 +161,7 @@ class BookServiceImplTest {
     @DisplayName("list: delegates to repository and maps results")
     void list_mapsPage() {
         Pageable pageable = PageRequest.of(0, 10);
-        when(bookRepository.findAll(pageable))
+        when(bookRepository.findAllWithAssociations(pageable))
                 .thenReturn(new PageImpl<>(List.of(book)));
 
         var page = bookService.list(pageable);

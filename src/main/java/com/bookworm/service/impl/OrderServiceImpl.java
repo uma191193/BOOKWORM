@@ -29,7 +29,7 @@ import java.util.UUID;
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
-    private final CartRepository cartRepository;
+    private final CartRepository  cartRepository;
 
     @Override
     @Transactional
@@ -55,10 +55,24 @@ public class OrderServiceImpl implements OrderService {
         BigDecimal tax = subtotal.multiply(new BigDecimal("0.18"));
         BigDecimal total = subtotal.add(tax);
 
+        var addr = request.address();
+        Address deliveryAddress = Address.builder()
+                .firstName(addr.firstName())
+                .lastName(addr.lastName())
+                .email(addr.email())
+                .phone(addr.phone())
+                .addressLine1(addr.addressLine1())
+                .addressLine2(addr.addressLine2())
+                .city(addr.city())
+                .pin(addr.pin())
+                .state(addr.state())
+                .country(addr.country())
+                .build();
+
         Order order = Order.builder()
                 .userId(userId)
                 .items(orderItems)
-                .deliveryAddress(Address.builder().id(request.addressId()).build())
+                .deliveryAddress(deliveryAddress)
                 .subtotal(subtotal)
                 .tax(tax)
                 .totalAmount(total)
@@ -68,23 +82,25 @@ public class OrderServiceImpl implements OrderService {
                 .build();
 
         Order saved = orderRepository.save(order);
-        // clear the cart after successful checkout
-        cart.getItems().clear();
-        cartRepository.save(cart);
+        // Cart is NOT cleared here — it is cleared only after successful payment
+        // to ensure the cart is retained if the user abandons the payment page.
         return toResponse(saved);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public OrderResponse getById(UUID orderId, UUID requesterId) {
         return toResponse(findOrThrow(orderId));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<OrderResponse> listByUser(UUID userId, Pageable pageable) {
         return orderRepository.findByUserId(userId, pageable).map(this::toResponse);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<OrderResponse> listByUserAndStatus(UUID userId, OrderStatus status, Pageable pageable) {
         return orderRepository.findByUserIdAndStatus(userId, status, pageable).map(this::toResponse);
     }

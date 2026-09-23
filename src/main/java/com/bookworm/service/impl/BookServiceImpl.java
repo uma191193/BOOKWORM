@@ -55,7 +55,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public Page<BookResponse> list(Pageable pageable) {
-        return bookRepository.findAll(pageable).map(this::toResponse);
+        return bookRepository.findAllWithAssociations(pageable).map(this::toResponse);
     }
 
     @Override
@@ -75,7 +75,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public Page<BookResponse> listByFormat(BookFormat format, Pageable pageable) {
-        return bookRepository.findByFormat(format, pageable).map(this::toResponse);
+        return bookRepository.findByFormatWithAssociations(format, pageable).map(this::toResponse);
     }
 
     @Override
@@ -148,7 +148,7 @@ public class BookServiceImpl implements BookService {
                 categoryResponses, book.getDescription(), book.getFormat(), book.getLanguage(),
                 book.getPrice(), book.getCurrencyCode(), book.getCoverImageUrl(), book.getIsbn(),
                 tags, book.getTentativeDeliveryDate(), book.getAverageRating(),
-                book.getSalesCount(), book.getStoreId(), book.getCreatedAt());
+                book.getSalesCount(), book.getStockCount(), book.getStoreId(), book.getCreatedAt());
     }
 
 }

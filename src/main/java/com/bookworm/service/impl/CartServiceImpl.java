@@ -29,6 +29,7 @@ public class CartServiceImpl implements CartService {
     private final BookService bookService;
 
     @Override
+    @Transactional
     public CartResponse getCart(UUID userId) {
         return toResponse(getOrCreateCart(userId));
     }
