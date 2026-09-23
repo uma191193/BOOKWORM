@@ -71,6 +71,18 @@ KEY (id) VALUES
   75,
   CURRENT_TIMESTAMP,
   CURRENT_TIMESTAMP
+),
+(
+  'aaaaaaaa-0000-0000-0000-000000000004',
+  'uma@abc.com',
+  '$2a$10$y9jfyUSAoHKVlVQKME9/muZz29DzjOQziBBZEmR4L1csLYHdf4rUO',
+  'Uma',
+  'Abc',
+  '1234567890',
+  'ADMIN',
+  0,
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
 );
 
 -- ── PUBLISHERS ────────────────────────────────────────────────────────────────

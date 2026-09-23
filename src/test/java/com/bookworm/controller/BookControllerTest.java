@@ -96,7 +96,7 @@ class BookControllerTest {
 
         mockMvc.perform(get("/api/v1/books/search").param("keyword", "atomic"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalElements").value(1));
+                .andExpect(jsonPath("$.page.totalElements").value(1));
     }
 
     @Test

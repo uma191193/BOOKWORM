@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,7 +47,7 @@ public class OrderController {
     @Operation(summary = "List current user's orders")
     public Page<OrderResponse> listMyOrders(@AuthenticationPrincipal User user,
                                             @RequestParam(required = false) OrderStatus status,
-                                            Pageable pageable) {
+                                            @ParameterObject Pageable pageable) {
         if (status != null) {
             return orderService.listByUserAndStatus(user.getId(), status, pageable);
         }

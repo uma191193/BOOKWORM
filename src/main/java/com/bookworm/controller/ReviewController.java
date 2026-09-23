@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -34,7 +35,7 @@ public class ReviewController {
 
     @GetMapping("/books/{bookId}")
     @Operation(summary = "List reviews for a book")
-    public Page<ReviewResponse> listByBook(@PathVariable UUID bookId, Pageable pageable) {
+    public Page<ReviewResponse> listByBook(@PathVariable UUID bookId, @ParameterObject Pageable pageable) {
         return reviewService.listByBook(bookId, pageable);
     }
 

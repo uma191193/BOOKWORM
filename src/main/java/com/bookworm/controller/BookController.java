@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -36,31 +37,31 @@ public class BookController {
 
     @GetMapping
     @Operation(summary = "List all books (paginated)")
-    public Page<BookResponse> list(Pageable pageable) {
+    public Page<BookResponse> list(@ParameterObject Pageable pageable) {
         return bookService.list(pageable);
     }
 
     @GetMapping("/search")
     @Operation(summary = "Search books by title keyword")
-    public Page<BookResponse> search(@RequestParam String keyword, Pageable pageable) {
+    public Page<BookResponse> search(@RequestParam String keyword, @ParameterObject Pageable pageable) {
         return bookService.search(keyword, pageable);
     }
 
     @GetMapping("/by-category/{categoryId}")
     @Operation(summary = "List books by category")
-    public Page<BookResponse> byCategory(@PathVariable UUID categoryId, Pageable pageable) {
+    public Page<BookResponse> byCategory(@PathVariable UUID categoryId, @ParameterObject Pageable pageable) {
         return bookService.listByCategory(categoryId, pageable);
     }
 
     @GetMapping("/by-author/{authorId}")
     @Operation(summary = "List books by author")
-    public Page<BookResponse> byAuthor(@PathVariable UUID authorId, Pageable pageable) {
+    public Page<BookResponse> byAuthor(@PathVariable UUID authorId, @ParameterObject Pageable pageable) {
         return bookService.listByAuthor(authorId, pageable);
     }
 
     @GetMapping("/by-format")
     @Operation(summary = "Filter books by format (PRINT / EBOOK / AUDIO)")
-    public Page<BookResponse> byFormat(@RequestParam BookFormat format, Pageable pageable) {
+    public Page<BookResponse> byFormat(@RequestParam BookFormat format, @ParameterObject Pageable pageable) {
         return bookService.listByFormat(format, pageable);
     }
 

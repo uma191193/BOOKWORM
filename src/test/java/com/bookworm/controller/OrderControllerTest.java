@@ -113,7 +113,7 @@ class OrderControllerTest {
 
         mockMvc.perform(get("/api/v1/orders").with(authentication(auth)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalElements").value(1));
+                .andExpect(jsonPath("$.page.totalElements").value(1));
     }
 
     @Test

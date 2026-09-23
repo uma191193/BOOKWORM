@@ -9,8 +9,13 @@ import com.bookworm.model.catalog.BookFormat;
 import com.bookworm.model.catalog.Publisher;
 import com.bookworm.repository.AuthorRepository;
 import com.bookworm.repository.BookRepository;
+import com.bookworm.repository.CartItemRepository;
 import com.bookworm.repository.CategoryRepository;
+import com.bookworm.repository.OrderItemRepository;
 import com.bookworm.repository.PublisherRepository;
+import com.bookworm.repository.RecommendationRepository;
+import com.bookworm.repository.ReviewRepository;
+import com.bookworm.repository.WishlistItemRepository;
 import com.bookworm.service.impl.BookServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -39,10 +44,15 @@ import static org.mockito.Mockito.*;
 @DisplayName("BookServiceImpl")
 class BookServiceImplTest {
 
-    @Mock BookRepository     bookRepository;
-    @Mock AuthorRepository   authorRepository;
-    @Mock CategoryRepository categoryRepository;
-    @Mock PublisherRepository publisherRepository;
+    @Mock BookRepository          bookRepository;
+    @Mock AuthorRepository        authorRepository;
+    @Mock CategoryRepository      categoryRepository;
+    @Mock PublisherRepository     publisherRepository;
+    @Mock ReviewRepository        reviewRepository;
+    @Mock CartItemRepository      cartItemRepository;
+    @Mock WishlistItemRepository  wishlistItemRepository;
+    @Mock OrderItemRepository     orderItemRepository;
+    @Mock RecommendationRepository recommendationRepository;
 
     @InjectMocks BookServiceImpl bookService;
 
@@ -169,7 +179,12 @@ class BookServiceImplTest {
 
         bookService.delete(bookId);
 
-        verify(bookRepository).delete(book);
+        verify(reviewRepository).deleteByBookId(bookId);
+        verify(cartItemRepository).deleteByBookId(bookId);
+        verify(wishlistItemRepository).deleteByBookId(bookId);
+        verify(orderItemRepository).deleteByBookId(bookId);
+        verify(recommendationRepository).deleteByBookId(bookId);
+        verify(bookRepository).deleteById(bookId);
     }
 
     @Test
