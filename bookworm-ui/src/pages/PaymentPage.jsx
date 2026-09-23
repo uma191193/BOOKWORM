@@ -76,7 +76,7 @@ export default function PaymentPage() {
         {payment ? (
           <div className="card" style={{ padding: '1.5rem', textAlign: 'center' }}>
             <div style={{ fontSize: '2.5rem', marginBottom: '.5rem' }}>
-              {payment.status === 'COMPLETED' ? '✅' : '⏳'}
+              {payment.status === 'SUCCESS' ? '✅' : '⏳'}
             </div>
             <h3>Payment {payment.status}</h3>
             <div style={{ marginTop: '.75rem', fontSize: '.9rem', color: 'var(--muted)' }}>

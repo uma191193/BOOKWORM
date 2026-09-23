@@ -79,7 +79,7 @@ export default function HomePage() {
                 const meta = getCatMeta(c.name);
                 return (
                   <Link key={c.id} to={`/browse?category=${c.id}`} className="cat-card">
-                    <div className="cat-card-icon" style={{ color: meta.color }}>
+                    <div className="cat-card-icon" style={{ color: meta.color, background: `${meta.color}1a` }}>
                       {meta.icon}
                     </div>
                     {c.name}

@@ -29,6 +29,7 @@ export function statusBadge(status) {
     CANCELLED:  'danger',
     RETURNED:   'danger',
     PAID:       'success',
+    SUCCESS:    'success',
     FAILED:     'danger',
     PROCESSING: 'warn',
     REFUNDED:   'warn',

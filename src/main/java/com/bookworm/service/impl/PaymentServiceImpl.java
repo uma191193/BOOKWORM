@@ -35,7 +35,7 @@ public class PaymentServiceImpl implements PaymentService {
      *
      * <p>On success:
      * <ol>
-     *   <li>Saves a {@link Payment} record with status COMPLETED.</li>
+     *   <li>Saves a {@link Payment} record with status SUCCESS.</li>
      *   <li>Links the payment ID to the order and marks order CONFIRMED.</li>
      *   <li>Decrements {@code stockCount} and increments {@code salesCount}
      *       for every ordered book.</li>
@@ -53,7 +53,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .orderId(order.getId())
                 .method(request.method())
                 .amount(order.getTotalAmount())
-                .status(PaymentStatus.COMPLETED)
+                .status(PaymentStatus.SUCCESS)
                 .transactionRef("TXN-" + UUID.randomUUID().toString().replace("-", "").substring(0, 12).toUpperCase())
                 .completedAt(LocalDateTime.now())
                 .build();
