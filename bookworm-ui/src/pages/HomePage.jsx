@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { booksApi, categoriesApi } from '../api';
 import BookCard from '../components/BookCard';
 import { Spinner } from '../components/Shared';
+import { useAuth } from '../context/AuthContext';
 
 const CATEGORY_META = [
   { name: 'Self Help',      icon: '🧠', color: '#6366f1' },
@@ -22,6 +23,7 @@ function getCatMeta(name) {
 }
 
 export default function HomePage() {
+  const { user } = useAuth();
   const [featured,   setFeatured]   = useState([]);
   const [categories, setCategories] = useState([]);
   const [newArrivals, setNewArrivals] = useState([]);
@@ -50,7 +52,14 @@ export default function HomePage() {
           <p>Thousands of titles in paperback, hardcover & eBook — delivered to your doorstep fast, starting at just ₹195.</p>
           <div className="hero-actions">
             <Link to="/browse" className="btn btn-primary btn-xl">Browse Catalog</Link>
-            <Link to="/register" className="btn btn-secondary btn-xl">Join Free →</Link>
+            {user ? (
+              <Link to="/orders" className="btn btn-secondary btn-xl">My Orders</Link>
+            ) : (
+              <>
+                <Link to="/login" className="btn btn-outline btn-xl">Sign In</Link>
+                <Link to="/register" className="btn btn-secondary btn-xl">Join Free →</Link>
+              </>
+            )}
           </div>
           <div className="hero-stats">
             {[

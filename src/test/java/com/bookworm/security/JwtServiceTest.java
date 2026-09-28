@@ -62,4 +62,13 @@ class JwtServiceTest {
         String t2 = jwtService.generateToken("bob@example.com");
         assertThat(t1).isNotEqualTo(t2);
     }
+
+    @Test
+    @DisplayName("generateToken with role embeds a decodable role claim")
+    void generateToken_withRole_embedsRoleClaim() {
+        String token = jwtService.generateToken("admin@example.com", "ADMIN");
+        String payloadJson = new String(java.util.Base64.getUrlDecoder()
+                .decode(token.split("\\.")[1]), java.nio.charset.StandardCharsets.UTF_8);
+        assertThat(payloadJson).contains("\"role\":\"ADMIN\"");
+    }
 }

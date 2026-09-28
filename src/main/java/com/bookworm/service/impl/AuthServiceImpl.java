@@ -40,13 +40,15 @@ public class AuthServiceImpl implements AuthService {
                 .role(Role.MEMBER)
                 .build();
         userRepository.save(user);
-        return AuthResponse.bearer(jwtService.generateToken(user.getEmail()));
+        return AuthResponse.bearer(jwtService.generateToken(user.getEmail(), user.getRole().name()));
     }
 
     @Override
     public AuthResponse login(LoginRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.email(), request.password()));
-        return AuthResponse.bearer(jwtService.generateToken(request.email()));
+        User user = userRepository.findByEmail(request.email())
+                .orElseThrow(() -> new IllegalStateException("Authenticated user not found: " + request.email()));
+        return AuthResponse.bearer(jwtService.generateToken(user.getEmail(), user.getRole().name()));
     }
 }

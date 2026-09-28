@@ -32,13 +32,19 @@ public class JwtService {
     }
 
     public String generateToken(String subject) {
+        return generateToken(subject, null);
+    }
+
+    public String generateToken(String subject, String role) {
         long now = System.currentTimeMillis();
-        return Jwts.builder()
+        var builder = Jwts.builder()
                 .subject(subject)
                 .issuedAt(new Date(now))
-                .expiration(new Date(now + expirationMs))
-                .signWith(signingKey)
-                .compact();
+                .expiration(new Date(now + expirationMs));
+        if (role != null) {
+            builder.claim("role", role);
+        }
+        return builder.signWith(signingKey).compact();
     }
 
     public String extractSubject(String token) {

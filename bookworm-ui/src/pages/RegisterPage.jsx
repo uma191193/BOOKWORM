@@ -7,7 +7,7 @@ export default function RegisterPage() {
   const { register } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
-  const [form,    setForm]    = useState({ name: '', email: '', password: '' });
+  const [form,    setForm]    = useState({ firstName: '', lastName: '', email: '', phone: '', password: '' });
   const [error,   setError]   = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -18,7 +18,7 @@ export default function RegisterPage() {
     setError('');
     setLoading(true);
     try {
-      await register(form.name, form.email, form.password);
+      await register(form);
       toast('Account created — welcome to BookWorm! 🎉');
       navigate('/');
     } catch (err) {
@@ -38,15 +38,27 @@ export default function RegisterPage() {
         {error && <div className="alert alert-error">⚠ {error}</div>}
 
         <form className="form-stack" onSubmit={submit}>
-          <div className="form-group">
-            <label className="form-label">Full name</label>
-            <input className="form-input" type="text" name="name" required
-              value={form.name} onChange={handle} placeholder="Jane Doe" />
+          <div style={{ display: 'flex', gap: '.75rem' }}>
+            <div className="form-group" style={{ flex: 1 }}>
+              <label className="form-label">First name</label>
+              <input className="form-input" type="text" name="firstName" required
+                value={form.firstName} onChange={handle} placeholder="Jane" />
+            </div>
+            <div className="form-group" style={{ flex: 1 }}>
+              <label className="form-label">Last name</label>
+              <input className="form-input" type="text" name="lastName" required
+                value={form.lastName} onChange={handle} placeholder="Doe" />
+            </div>
           </div>
           <div className="form-group">
             <label className="form-label">Email address</label>
             <input className="form-input" type="email" name="email" required
               value={form.email} onChange={handle} placeholder="you@example.com" />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Phone <span style={{ color: 'var(--muted)', fontWeight: 400 }}>(optional)</span></label>
+            <input className="form-input" type="tel" name="phone"
+              value={form.phone} onChange={handle} placeholder="9876543210" />
           </div>
           <div className="form-group">
             <label className="form-label">Password</label>

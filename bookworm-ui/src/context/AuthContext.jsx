@@ -21,8 +21,8 @@ export function AuthProvider({ children }) {
     return userInfo;
   }, []);
 
-  const register = useCallback(async (name, email, password) => {
-    const data = await authApi.register({ name, email, password });
+  const register = useCallback(async ({ firstName, lastName, email, phone, password }) => {
+    const data = await authApi.register({ firstName, lastName, email, phone: phone || undefined, password });
     localStorage.setItem('bw_token', data.accessToken);
     const payload = JSON.parse(atob(data.accessToken.split('.')[1]));
     const userInfo = { email: payload.sub, role: payload.role ?? 'MEMBER' };

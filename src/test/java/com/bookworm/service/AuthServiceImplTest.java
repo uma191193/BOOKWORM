@@ -53,7 +53,7 @@ class AuthServiceImplTest {
         when(userRepository.existsByEmail("alice@example.com")).thenReturn(false);
         when(passwordEncoder.encode("Password1!")).thenReturn("hashed");
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
-        when(jwtService.generateToken("alice@example.com")).thenReturn("jwt-token");
+        when(jwtService.generateToken("alice@example.com", "MEMBER")).thenReturn("jwt-token");
 
         AuthResponse response = authService.register(registerRequest);
 
@@ -81,7 +81,15 @@ class AuthServiceImplTest {
     @DisplayName("login: authenticates and returns bearer token")
     void login_returnsToken() {
         LoginRequest loginRequest = new LoginRequest("alice@example.com", "Password1!");
-        when(jwtService.generateToken("alice@example.com")).thenReturn("jwt-token");
+        User existingUser = User.builder()
+                .email("alice@example.com")
+                .passwordHash("hashed")
+                .firstName("Alice")
+                .lastName("Smith")
+                .role(Role.MEMBER)
+                .build();
+        when(userRepository.findByEmail("alice@example.com")).thenReturn(java.util.Optional.of(existingUser));
+        when(jwtService.generateToken("alice@example.com", "MEMBER")).thenReturn("jwt-token");
 
         AuthResponse response = authService.login(loginRequest);
 
