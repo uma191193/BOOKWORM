@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="340" viewBox="0 0 400 340" fill="none">
+  <g transform="translate(40,190) rotate(-6)">
+    <rect x="0" y="0" width="150" height="26" rx="4" fill="#f5a623"/>
+  </g>
+  <g transform="translate(52,164) rotate(-3)">
+    <rect x="0" y="0" width="140" height="26" rx="4" fill="#16a370"/>
+  </g>
+  <g transform="translate(46,138) rotate(2)">
+    <rect x="0" y="0" width="146" height="26" rx="4" fill="#ef4770"/>
+  </g>
+
+  <g transform="translate(120,150)">
+    <path d="M0 40 C 60 10, 120 10, 150 40 L150 190 C 120 165, 60 165, 0 190 Z" fill="#fdfaf3" stroke="#e3dcc8" stroke-width="2"/>
+    <path d="M150 40 C 180 10, 240 10, 300 40 L300 190 C 240 165, 180 165, 150 190 Z" fill="#fdfaf3" stroke="#e3dcc8" stroke-width="2"/>
+    <path d="M150 40 L150 190" stroke="#c9c0a6" stroke-width="3"/>
+    <path d="M20 60 C 60 45, 110 45, 140 62" stroke="#d8d2bd" stroke-width="4" stroke-linecap="round"/>
+    <path d="M20 78 C 60 63, 110 63, 140 80" stroke="#d8d2bd" stroke-width="4" stroke-linecap="round"/>
+    <path d="M20 96 C 60 81, 110 81, 140 98" stroke="#d8d2bd" stroke-width="4" stroke-linecap="round"/>
+    <path d="M160 62 C 190 45, 240 45, 280 60" stroke="#d8d2bd" stroke-width="4" stroke-linecap="round"/>
+    <path d="M160 80 C 190 63, 240 63, 280 78" stroke="#d8d2bd" stroke-width="4" stroke-linecap="round"/>
+    <path d="M160 98 C 190 81, 240 81, 280 96" stroke="#d8d2bd" stroke-width="4" stroke-linecap="round"/>
+  </g>
+
+  <path d="M268 150 L268 210 L278 198 L288 210 L288 150 Z" fill="#ff6b4a"/>
+</svg>

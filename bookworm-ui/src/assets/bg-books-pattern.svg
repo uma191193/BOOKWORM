@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="140" viewBox="0 0 240 140">
+  <g opacity="0.06">
+    <rect x="0"   y="60" width="16" height="80" fill="#5b4fe0"/>
+    <rect x="16"  y="40" width="12" height="100" fill="#8b5cf6"/>
+    <rect x="28"  y="70" width="20" height="70" fill="#ff6b4a"/>
+    <rect x="48"  y="50" width="14" height="90" fill="#f5a623"/>
+    <rect x="62"  y="65" width="18" height="75" fill="#16a370"/>
+    <rect x="80"  y="45" width="13" height="95" fill="#5b4fe0"/>
+    <rect x="93"  y="72" width="22" height="68" fill="#ef4770"/>
+    <rect x="115" y="55" width="15" height="85" fill="#8b5cf6"/>
+    <rect x="130" y="68" width="17" height="72" fill="#f5a623"/>
+    <rect x="147" y="42" width="12" height="98" fill="#ff6b4a"/>
+    <rect x="159" y="60" width="19" height="80" fill="#16a370"/>
+    <rect x="178" y="50" width="14" height="90" fill="#5b4fe0"/>
+    <rect x="192" y="70" width="21" height="70" fill="#8b5cf6"/>
+    <rect x="213" y="58" width="13" height="82" fill="#ef4770"/>
+    <rect x="226" y="65" width="14" height="75" fill="#f5a623"/>
+  </g>
+</svg>

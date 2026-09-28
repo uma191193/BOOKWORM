@@ -189,24 +189,24 @@ export default function AdminPage() {
 
         {/* ── Books Tab ── */}
         {tab === 'books' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '1.5rem', alignItems: 'start' }}>
+          <div className="admin-grid">
             {/* Book list */}
             <div className="card">
               {bLoading ? <Spinner /> : books.map((b) => (
-                <div key={b.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '.75rem 1rem', borderBottom: '1px solid var(--border)' }}>
+                <div key={b.id} className="admin-list-row">
                   <div>
-                    <Link to={`/books/${b.id}`} style={{ fontWeight: 600, fontSize: '.9rem' }}>{b.title}</Link>
-                    <div style={{ fontSize: '.8rem', color: 'var(--muted)' }}>{b.author?.name} · {b.format} · {fmt(b.price)}</div>
+                    <Link to={`/books/${b.id}`} className="admin-list-row-title">{b.title}</Link>
+                    <div className="admin-list-row-meta">{b.author?.name} · {b.format} · {fmt(b.price)}</div>
                   </div>
                   <button className="btn btn-danger btn-sm" onClick={() => deleteBook(b.id)}>Delete</button>
                 </div>
               ))}
-              {!bLoading && books.length === 0 && <p style={{ padding: '1rem', color: 'var(--muted)' }}>No books yet.</p>}
+              {!bLoading && books.length === 0 && <p className="admin-list-empty">No books yet.</p>}
             </div>
 
             {/* Create Book form */}
-            <div className="card" style={{ padding: '1.25rem' }}>
-              <h3 style={{ marginBottom: '1rem' }}>Add New Book</h3>
+            <div className="card admin-form-card">
+              <h3>Add New Book</h3>
               <form className="form-stack" onSubmit={createBook}>
                 <div className="form-group">
                   <label className="form-label">Title *</label>
@@ -273,18 +273,20 @@ export default function AdminPage() {
 
         {/* ── Authors Tab ── */}
         {tab === 'authors' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '1.5rem', alignItems: 'start' }}>
+          <div className="admin-grid admin-grid-sm">
             <div className="card">
               {authors.map((a) => (
-                <div key={a.id} style={{ padding: '.7rem 1rem', borderBottom: '1px solid var(--border)' }}>
-                  <strong style={{ fontSize: '.9rem' }}>{a.name}</strong>
-                  {a.bio && <div style={{ fontSize: '.82rem', color: 'var(--muted)' }}>{a.bio}</div>}
+                <div key={a.id} className="admin-list-row">
+                  <div>
+                    <span className="admin-list-row-title">{a.name}</span>
+                    {a.bio && <div className="admin-list-row-meta">{a.bio}</div>}
+                  </div>
                 </div>
               ))}
-              {authors.length === 0 && <p style={{ padding: '1rem', color: 'var(--muted)' }}>No authors yet.</p>}
+              {authors.length === 0 && <p className="admin-list-empty">No authors yet.</p>}
             </div>
-            <div className="card" style={{ padding: '1.25rem' }}>
-              <h3 style={{ marginBottom: '1rem' }}>Add Author</h3>
+            <div className="card admin-form-card">
+              <h3>Add Author</h3>
               <form className="form-stack" onSubmit={createAuthor}>
                 <div className="form-group">
                   <label className="form-label">Name *</label>
@@ -306,18 +308,20 @@ export default function AdminPage() {
 
         {/* ── Categories Tab ── */}
         {tab === 'categories' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '1.5rem', alignItems: 'start' }}>
+          <div className="admin-grid admin-grid-sm">
             <div className="card">
               {categories.map((c) => (
-                <div key={c.id} style={{ padding: '.7rem 1rem', borderBottom: '1px solid var(--border)' }}>
-                  <strong style={{ fontSize: '.9rem' }}>{c.name}</strong>
-                  <div style={{ fontSize: '.82rem', color: 'var(--muted)' }}>{c.slug}</div>
+                <div key={c.id} className="admin-list-row">
+                  <div>
+                    <span className="admin-list-row-title">{c.name}</span>
+                    <div className="admin-list-row-meta">{c.slug}</div>
+                  </div>
                 </div>
               ))}
-              {categories.length === 0 && <p style={{ padding: '1rem', color: 'var(--muted)' }}>No categories yet.</p>}
+              {categories.length === 0 && <p className="admin-list-empty">No categories yet.</p>}
             </div>
-            <div className="card" style={{ padding: '1.25rem' }}>
-              <h3 style={{ marginBottom: '1rem' }}>Add Category</h3>
+            <div className="card admin-form-card">
+              <h3>Add Category</h3>
               <form className="form-stack" onSubmit={createCategory}>
                 <div className="form-group">
                   <label className="form-label">Name *</label>
@@ -344,12 +348,12 @@ export default function AdminPage() {
             {uLoading ? <Spinner /> : users.map((u) => {
               const isSelf = u.email === user.email;
               return (
-                <div key={u.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '.75rem 1rem', borderBottom: '1px solid var(--border)' }}>
+                <div key={u.id} className="admin-list-row">
                   <div>
-                    <strong style={{ fontSize: '.9rem' }}>{u.firstName} {u.lastName}</strong>
-                    <div style={{ fontSize: '.8rem', color: 'var(--muted)' }}>{u.email} · {u.role}{isSelf ? ' · (you)' : ''}</div>
+                    <span className="admin-list-row-title">{u.firstName} {u.lastName}</span>
+                    <div className="admin-list-row-meta">{u.email} · {u.role}{isSelf ? ' · (you)' : ''}</div>
                   </div>
-                  <div style={{ display: 'flex', gap: '.5rem' }}>
+                  <div className="admin-list-row-actions">
                     <button className="btn btn-outline btn-sm"
                       disabled={isSelf}
                       title={isSelf ? 'You cannot modify your own account' : undefined}
@@ -366,7 +370,7 @@ export default function AdminPage() {
                 </div>
               );
             })}
-            {!uLoading && users.length === 0 && <p style={{ padding: '1rem', color: 'var(--muted)' }}>No users yet.</p>}
+            {!uLoading && users.length === 0 && <p className="admin-list-empty">No users yet.</p>}
           </div>
         )}
       </div>
