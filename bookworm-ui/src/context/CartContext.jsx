@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { cartApi } from '../api';
+import { onSessionEnd } from '../utils/authEvents';
 
 const CartContext = createContext(null);
 
@@ -40,6 +41,10 @@ export function CartProvider({ children }) {
   const clear = useCallback(async () => {
     await cartApi.clear();
     setCart(null);
+  }, []);
+
+  useEffect(() => {
+    return onSessionEnd(() => setCart(null));
   }, []);
 
   const itemCount = cart?.items?.reduce((s, i) => s + i.quantity, 0) ?? 0;

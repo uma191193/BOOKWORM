@@ -10,6 +10,7 @@ import com.bookworm.model.order.Order;
 import com.bookworm.model.order.OrderItem;
 import com.bookworm.model.order.OrderStatus;
 import com.bookworm.model.shipping.Address;
+import com.bookworm.repository.BookRepository;
 import com.bookworm.repository.CartRepository;
 import com.bookworm.repository.OrderRepository;
 import com.bookworm.service.OrderService;
@@ -30,6 +31,7 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
     private final CartRepository  cartRepository;
+    private final BookRepository  bookRepository;
 
     @Override
     @Transactional
@@ -38,6 +40,12 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Cart not found for user: " + userId));
         if (cart.getItems().isEmpty()) {
             throw new BusinessException("Cannot checkout an empty cart.");
+        }
+        for (var ci : cart.getItems()) {
+            if (ci.getQuantity() > ci.getBook().getStockCount()) {
+                throw new BusinessException("Only " + ci.getBook().getStockCount()
+                        + " copies of \"" + ci.getBook().getTitle() + "\" are available.");
+            }
         }
 
         List<OrderItem> orderItems = cart.getItems().stream()
@@ -111,6 +119,16 @@ public class OrderServiceImpl implements OrderService {
         Order order = findOrThrow(orderId);
         if (LocalDateTime.now().isAfter(order.getCancellationDeadline())) {
             throw new BusinessException("Cancellation window has passed for order: " + orderId);
+        }
+        // Stock is only decremented once payment confirms the order, so only
+        // a CONFIRMED (paid) order needs its stock restored on cancellation.
+        if (order.getStatus() == OrderStatus.CONFIRMED) {
+            for (OrderItem item : order.getItems()) {
+                var book = item.getBook();
+                book.setStockCount(book.getStockCount() + item.getQuantity());
+                book.setSalesCount(Math.max(0, book.getSalesCount() - item.getQuantity()));
+                bookRepository.save(book);
+            }
         }
         order.setStatus(OrderStatus.CANCELLED);
         return toResponse(orderRepository.save(order));

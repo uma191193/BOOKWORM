@@ -68,6 +68,9 @@ export const couponsApi = {
 };
 
 export const usersApi = {
-  me:     ()     => client.get('/api/v1/users/me').then((r) => r.data),
-  update: (data) => client.put('/api/v1/users/me', data).then((r) => r.data),
+  me:         ()           => client.get('/api/v1/users/me').then((r) => r.data),
+  update:     (data)       => client.put('/api/v1/users/me', data).then((r) => r.data),
+  list:       (params)     => client.get('/api/v1/users', { params }).then((r) => r.data),
+  updateRole: (id, role)   => client.patch(`/api/v1/users/${id}/role`, { role }).then((r) => r.data),
+  delete:     (id)         => client.delete(`/api/v1/users/${id}`),
 };

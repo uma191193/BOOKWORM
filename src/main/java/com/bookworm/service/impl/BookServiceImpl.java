@@ -123,6 +123,7 @@ public class BookServiceImpl implements BookService {
         if (req.tags() != null) book.setTags(req.tags());
         book.setTentativeDeliveryDate(req.tentativeDeliveryDate());
         book.setStoreId(req.storeId());
+        book.setStockCount(req.stockCount());
         return book;
     }
 

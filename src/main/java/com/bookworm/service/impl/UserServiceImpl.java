@@ -2,11 +2,15 @@ package com.bookworm.service.impl;
 
 import com.bookworm.dto.user.UpdateUserRequest;
 import com.bookworm.dto.user.UserResponse;
+import com.bookworm.exception.BusinessException;
 import com.bookworm.exception.ResourceNotFoundException;
+import com.bookworm.model.user.Role;
 import com.bookworm.model.user.User;
 import com.bookworm.repository.UserRepository;
 import com.bookworm.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +28,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Page<UserResponse> list(Pageable pageable) {
+        return userRepository.findAll(pageable).map(this::toResponse);
+    }
+
+    @Override
     @Transactional
     public UserResponse update(UUID id, UpdateUserRequest request) {
         User user = findOrThrow(id);
@@ -36,7 +45,21 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void delete(UUID id) {
+    public UserResponse updateRole(UUID id, Role newRole, UUID requesterId) {
+        if (id.equals(requesterId)) {
+            throw new BusinessException("You cannot change your own role.");
+        }
+        User user = findOrThrow(id);
+        user.setRole(newRole);
+        return toResponse(userRepository.save(user));
+    }
+
+    @Override
+    @Transactional
+    public void delete(UUID id, UUID requesterId) {
+        if (id.equals(requesterId)) {
+            throw new BusinessException("You cannot delete your own account.");
+        }
         userRepository.delete(findOrThrow(id));
     }
 

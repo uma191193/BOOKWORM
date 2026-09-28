@@ -40,8 +40,8 @@ export default function BookDetailPage() {
     try {
       await addItem(book.id, 1);
       toast('Added to cart!');
-    } catch {
-      toast('Could not add to cart', 'error');
+    } catch (err) {
+      toast(err.response?.data?.detail ?? 'Could not add to cart', 'error');
     } finally {
       setAdding(false);
     }
@@ -130,8 +130,8 @@ export default function BookDetailPage() {
             )}
 
             <div style={{ display: 'flex', gap: '.75rem', flexWrap: 'wrap' }}>
-              <button className="btn btn-primary" onClick={handleAddToCart} disabled={adding}>
-                {adding ? 'Adding…' : '🛒 Add to Cart'}
+              <button className="btn btn-primary" onClick={handleAddToCart} disabled={adding || book.stockCount === 0}>
+                {book.stockCount === 0 ? 'Out of stock' : adding ? 'Adding…' : '🛒 Add to Cart'}
               </button>
             </div>
 

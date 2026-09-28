@@ -1,9 +1,12 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { authApi } from '../api';
+import { onSessionEnd, emitSessionEnd } from '../utils/authEvents';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
+  const navigate = useNavigate();
   const [user,  setUser]  = useState(() => {
     try { return JSON.parse(localStorage.getItem('bw_user')); } catch { return null; }
   });
@@ -33,11 +36,18 @@ export function AuthProvider({ children }) {
   }, []);
 
   const logout = useCallback(() => {
-    localStorage.removeItem('bw_token');
-    localStorage.removeItem('bw_user');
-    setToken(null);
-    setUser(null);
+    emitSessionEnd();
   }, []);
+
+  useEffect(() => {
+    return onSessionEnd(() => {
+      localStorage.removeItem('bw_token');
+      localStorage.removeItem('bw_user');
+      setToken(null);
+      setUser(null);
+      navigate('/login', { replace: true });
+    });
+  }, [navigate]);
 
   const isAdmin = user?.role === 'ADMIN';
 

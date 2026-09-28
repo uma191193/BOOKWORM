@@ -84,7 +84,7 @@ export default function CheckoutPage() {
       // Do NOT refresh cart here — cart is cleared only after payment succeeds
       navigate(`/orders/${order.id}/payment`);
     } catch (err) {
-      setError(err.response?.data?.message ?? 'Checkout failed. Please check your details and try again.');
+      setError(err.response?.data?.detail ?? 'Checkout failed. Please check your details and try again.');
     } finally {
       setLoading(false);
     }

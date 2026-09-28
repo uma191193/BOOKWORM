@@ -121,7 +121,7 @@ class BookServiceImplTest {
                 "Atomic Habits", authorId, publisherId, List.of(),
                 "Description", BookFormat.PAPERBACK, "English",
                 new BigDecimal("499.00"), "INR", null, "978-1",
-                List.of("Self Help"), null, null);
+                List.of("Self Help"), null, null, 10);
 
         when(authorRepository.findById(authorId)).thenReturn(Optional.of(author));
         when(publisherRepository.findById(publisherId)).thenReturn(Optional.of(publisher));
@@ -146,7 +146,7 @@ class BookServiceImplTest {
         BookRequest req = new BookRequest(
                 "Atomic Habits", authorId, null, null, null,
                 BookFormat.PAPERBACK, "English", new BigDecimal("499.00"),
-                "INR", null, null, null, null, null);
+                "INR", null, null, null, null, null, 10);
 
         when(authorRepository.findById(authorId)).thenReturn(Optional.empty());
 

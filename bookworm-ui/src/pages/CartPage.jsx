@@ -33,6 +33,22 @@ export default function CartPage() {
 
   const items = cart?.items ?? [];
 
+  const handleUpdateItem = async (itemId, quantity) => {
+    try {
+      await updateItem(itemId, quantity);
+    } catch (err) {
+      toast(err.response?.data?.detail ?? 'Could not update quantity', 'error');
+    }
+  };
+
+  const handleRemoveItem = async (itemId) => {
+    try {
+      await removeItem(itemId);
+    } catch {
+      toast('Could not remove item', 'error');
+    }
+  };
+
   return (
     <div className="page">
       <div className="container">
@@ -68,13 +84,14 @@ export default function CartPage() {
                     <div style={{ fontSize: '.85rem' }}>{fmt(item.unitPrice, 'INR')} each</div>
                     <div className="cart-item-controls">
                       <button className="qty-btn"
-                        onClick={() => updateItem(item.id, Math.max(1, item.quantity - 1))}>−</button>
+                        onClick={() => handleUpdateItem(item.id, Math.max(1, item.quantity - 1))}>−</button>
                       <span style={{ minWidth: '2rem', textAlign: 'center' }}>{item.quantity}</span>
                       <button className="qty-btn"
-                        onClick={() => updateItem(item.id, item.quantity + 1)}>+</button>
+                        disabled={item.quantity >= item.book.stockCount}
+                        onClick={() => handleUpdateItem(item.id, item.quantity + 1)}>+</button>
                       <button className="btn btn-outline btn-sm"
                         style={{ marginLeft: '.5rem', color: 'var(--danger)' }}
-                        onClick={() => removeItem(item.id)}>Remove</button>
+                        onClick={() => handleRemoveItem(item.id)}>Remove</button>
                     </div>
                   </div>
                   <div style={{ fontWeight: 700, whiteSpace: 'nowrap' }}>{fmt(item.lineTotal, 'INR')}</div>

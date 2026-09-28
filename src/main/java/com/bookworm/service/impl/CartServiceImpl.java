@@ -4,6 +4,7 @@ import com.bookworm.dto.cart.AddToCartRequest;
 import com.bookworm.dto.cart.CartItemResponse;
 import com.bookworm.dto.cart.CartResponse;
 import com.bookworm.dto.cart.UpdateCartItemRequest;
+import com.bookworm.exception.BusinessException;
 import com.bookworm.exception.ResourceNotFoundException;
 import com.bookworm.model.cart.Cart;
 import com.bookworm.model.cart.CartItem;
@@ -41,18 +42,23 @@ public class CartServiceImpl implements CartService {
         Book book = bookRepository.findById(request.bookId())
                 .orElseThrow(() -> new ResourceNotFoundException("Book not found: " + request.bookId()));
 
-        cart.getItems().stream()
+        CartItem existingItem = cart.getItems().stream()
                 .filter(i -> i.getBook().getId().equals(request.bookId()))
                 .findFirst()
-                .ifPresentOrElse(
-                        existing -> existing.setQuantity(existing.getQuantity() + request.quantity()),
-                        () -> cart.getItems().add(CartItem.builder()
-                                .cartId(cart.getId())
-                                .book(book)
-                                .quantity(request.quantity())
-                                .unitPrice(book.getPrice())
-                                .build())
-                );
+                .orElse(null);
+        int existingQty = existingItem != null ? existingItem.getQuantity() : 0;
+        requireAvailable(book, existingQty + request.quantity());
+
+        if (existingItem != null) {
+            existingItem.setQuantity(existingQty + request.quantity());
+        } else {
+            cart.getItems().add(CartItem.builder()
+                    .cartId(cart.getId())
+                    .book(book)
+                    .quantity(request.quantity())
+                    .unitPrice(book.getPrice())
+                    .build());
+        }
         return toResponse(cartRepository.save(cart));
     }
 
@@ -64,6 +70,7 @@ public class CartServiceImpl implements CartService {
                 .filter(i -> i.getId().equals(request.cartItemId()))
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("Cart item not found: " + request.cartItemId()));
+        requireAvailable(item.getBook(), request.quantity());
         item.setQuantity(request.quantity());
         return toResponse(cartRepository.save(cart));
     }
@@ -86,6 +93,15 @@ public class CartServiceImpl implements CartService {
     }
 
     // ── helpers ──────────────────────────────────────────────────────────────
+
+    private void requireAvailable(Book book, int requestedQuantity) {
+        if (book.getStockCount() == 0) {
+            throw new BusinessException("\"" + book.getTitle() + "\" is out of stock.");
+        }
+        if (requestedQuantity > book.getStockCount()) {
+            throw new BusinessException("Only " + book.getStockCount() + " copies of \"" + book.getTitle() + "\" are available.");
+        }
+    }
 
     private Cart getOrCreateCart(UUID userId) {
         return cartRepository.findByUserId(userId).orElseGet(() ->

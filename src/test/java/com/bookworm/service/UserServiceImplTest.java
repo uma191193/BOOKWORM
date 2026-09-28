@@ -85,7 +85,7 @@ class UserServiceImplTest {
     void delete_removesUser() {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        userService.delete(userId);
+        userService.delete(userId, UUID.randomUUID());
 
         verify(userRepository).delete(user);
     }
@@ -95,7 +95,32 @@ class UserServiceImplTest {
     void delete_throwsWhenMissing() {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> userService.delete(userId))
+        assertThatThrownBy(() -> userService.delete(userId, UUID.randomUUID()))
                 .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("delete: throws BusinessException when deleting self")
+    void delete_throwsWhenSelf() {
+        assertThatThrownBy(() -> userService.delete(userId, userId))
+                .isInstanceOf(com.bookworm.exception.BusinessException.class);
+    }
+
+    @Test
+    @DisplayName("updateRole: changes the role for another user")
+    void updateRole_changesRole() {
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        UserResponse response = userService.updateRole(userId, Role.ADMIN, UUID.randomUUID());
+
+        assertThat(response.role()).isEqualTo(Role.ADMIN);
+    }
+
+    @Test
+    @DisplayName("updateRole: throws BusinessException when changing own role")
+    void updateRole_throwsWhenSelf() {
+        assertThatThrownBy(() -> userService.updateRole(userId, Role.ADMIN, userId))
+                .isInstanceOf(com.bookworm.exception.BusinessException.class);
     }
 }

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { emitSessionEnd } from '../utils/authEvents';
 
 // In dev the Vite proxy forwards /api → http://127.0.0.1:8080
 // In production set VITE_API_BASE_URL to your API origin.
@@ -18,13 +19,12 @@ client.interceptors.request.use((config) => {
   return config;
 });
 
-// On 401 clear token so UI redirects to login
+// On 401 end the session so the UI clears cached state and redirects to login
 client.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err.response?.status === 401) {
-      localStorage.removeItem('bw_token');
-      localStorage.removeItem('bw_user');
+      emitSessionEnd();
     }
     return Promise.reject(err);
   }

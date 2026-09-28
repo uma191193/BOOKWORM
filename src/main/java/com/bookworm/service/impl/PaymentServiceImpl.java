@@ -2,6 +2,7 @@ package com.bookworm.service.impl;
 
 import com.bookworm.dto.payment.InitiatePaymentRequest;
 import com.bookworm.dto.payment.PaymentResponse;
+import com.bookworm.exception.BusinessException;
 import com.bookworm.exception.ResourceNotFoundException;
 import com.bookworm.model.cart.Cart;
 import com.bookworm.model.order.Order;
@@ -68,7 +69,11 @@ public class PaymentServiceImpl implements PaymentService {
         for (OrderItem item : savedOrder.getItems()) {
             var book = item.getBook();
             int qty = item.getQuantity();
-            book.setStockCount(Math.max(0, book.getStockCount() - qty));
+            if (qty > book.getStockCount()) {
+                throw new BusinessException("Only " + book.getStockCount()
+                        + " copies of \"" + book.getTitle() + "\" are available.");
+            }
+            book.setStockCount(book.getStockCount() - qty);
             book.setSalesCount(book.getSalesCount() + qty);
             bookRepository.save(book);
         }

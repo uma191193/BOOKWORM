@@ -2,6 +2,7 @@ package com.bookworm.dto.catalog;
 
 import com.bookworm.model.catalog.BookFormat;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -24,5 +25,6 @@ public record BookRequest(
         String isbn,
         List<String> tags,
         LocalDate tentativeDeliveryDate,
-        UUID storeId
+        UUID storeId,
+        @NotNull @Min(0) Integer stockCount
 ) {}

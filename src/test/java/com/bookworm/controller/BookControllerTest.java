@@ -106,7 +106,7 @@ class BookControllerTest {
         BookRequest req = new BookRequest(
                 "New Book", UUID.randomUUID(), null, List.of(), "Desc",
                 BookFormat.EBOOK, "English", new BigDecimal("299.00"),
-                "INR", null, null, List.of(), null, null);
+                "INR", null, null, List.of(), null, null, 10);
         when(bookService.create(any())).thenReturn(bookResponse);
 
         mockMvc.perform(post("/api/v1/books")
@@ -122,7 +122,7 @@ class BookControllerTest {
         BookRequest req = new BookRequest(
                 "New Book", UUID.randomUUID(), null, List.of(), "Desc",
                 BookFormat.EBOOK, "English", new BigDecimal("299.00"),
-                "INR", null, null, List.of(), null, null);
+                "INR", null, null, List.of(), null, null, 10);
 
         mockMvc.perform(post("/api/v1/books")
                         .contentType(MediaType.APPLICATION_JSON)

@@ -65,6 +65,7 @@ class OrderServiceImplTest {
                 .format(BookFormat.PAPERBACK)
                 .price(new BigDecimal("499.00")).currencyCode("INR")
                 .categories(new ArrayList<>()).tags(new ArrayList<>())
+                .stockCount(10)
                 .createdAt(LocalDateTime.now())
                 .build();
 
